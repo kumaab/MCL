@@ -34,7 +34,15 @@ java -cp "target/classes:target/dependency/*" Main
 ```
 java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar"
 ```
-#### Search through the last N Months of Commits
+#### Search for Custom Committer
+```
+java -cp "target/classes:target/dependency/*" Main -c "Abhishek Kumar"
+```
+#### Search through the last 6 Months of Commits
 ```
 java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar" -m 6
+```
+#### Search and Sort Results by Status
+```
+java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar" -sort
 ```

@@ -149,6 +149,7 @@ public class Main {
         LOG.info("Hey, Welcome to the MCL Library!");
         props = Config.readProperties("src/main/resources/config.properties");
         String author = null, committer = null;
+        boolean sortByStatus = false;
         for(int i=0; i<args.length; i++){
             String arg = args[i];
             if(arg.equals("-a") || arg.equals("--author"))
@@ -157,6 +158,8 @@ public class Main {
                 committer = args[i+1];
             if(arg.equals("-m") || arg.equals("--months"))
                 nMonths = Integer.parseInt(args[i+1]);
+            if(arg.equals("-sort"))
+                sortByStatus = true;
         }
         init();
         LocalDate startDate       = endDate.minus(nMonths, ChronoUnit.MONTHS);
@@ -178,7 +181,7 @@ public class Main {
             }
         });
         search(originalCommits, replicatedCommits);
-        Query query = new Query(resultSet);
+        Query query = new Query(resultSet, sortByStatus);
         if (author != null)
             query.printResultForAuthor(author);
         else if (committer != null)

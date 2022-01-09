@@ -17,8 +17,14 @@ public class Query {
     private static boolean full_search = false;
     private static int matches = 0, closematches = 0, commits = 0;
 
-    Query(List<Match> result){
+    Query(List<Match> result, boolean status){
         resultSet = result;
+        if (status)
+            resultSet.sort((o1, o2) -> o2.getMatchCount() - o1.getMatchCount());// asc order sort by status
+        else {
+            // desc order sort by date
+            resultSet.sort((o1, o2) -> o2.getOriginalCommit().getCommitDate().compareTo(o1.getOriginalCommit().getCommitDate()));
+        }
     }
 
     private static boolean authorMatch(String user, Match match){
@@ -30,7 +36,9 @@ public class Query {
     }
 
     static String addHeader(){
-        String res = Utils.appendSpaces("", 139);
+        String res  = Utils.appendSpaces("Commit Message", 112);
+        res  = res.concat(Utils.appendSpaces("Status", PAD));
+        res  = res.concat(Utils.padding());
         if(full_search){
             res  = res.concat(Utils.appendSpaces("Author", PAD));
             res  = res.concat(Utils.padding());
