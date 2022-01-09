@@ -25,10 +25,11 @@ mvn clean package install dependency:copy-dependencies
 
 Working Directory: MCL
 
-#### Exhaustive Search
+#### Exhaustive Search - Default Usage
 ```
 java -cp "target/classes:target/dependency/*" Main
 ```
+Returns search results for all commits by all developers in the last 12 months sorted by commit date in descending order.
 
 #### Search for Custom Author
 ```
