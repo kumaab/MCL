@@ -7,18 +7,19 @@ import java.util.Locale;
 
 public class Query {
 
-    private static List<Match> resultSet;
     private static final String FOUND         = "FOUND";
     private static final String NOT_FOUND     = "NOT FOUND";
     private static final String BEST_MATCH    = "BEST MATCH";
     private static final String CLOSEST_MATCH = "CLOSEST MATCH";
-    private static final int PAD = 15;
+    private static final int    PAD           = 15;
     private static final Logger LOG           = LogManager.getLogger(Query.class);
-    private static boolean full_search = false;
+    private static boolean full_search = false, showMissing = false;
     private static int matches = 0, closematches = 0, commits = 0;
+    private static List<Match> resultSet;
 
-    Query(List<Match> result, boolean status){
+    Query(List<Match> result, boolean status, boolean showMissing){
         resultSet = result;
+        Query.showMissing = showMissing;
         if (status)
             resultSet.sort((o1, o2) -> o2.getMatchCount() - o1.getMatchCount());// asc order sort by status
         else {
@@ -65,20 +66,20 @@ public class Query {
     }
 
     public void logResult(Match match) {
-        if (match.getMatchCount() > 0) {
+        if (match.getMatchCount() > 0 && !showMissing) {
             LOG.info(addInfo(match.getOriginalCommit(), FOUND));
             LOG.info(addInfo(match.getBestMatch(), BEST_MATCH));
             matches++;
+            LOG.info("");
         } else if (match.getMatchCount() == 0) {
             LOG.info(addInfo(match.getOriginalCommit(), NOT_FOUND));
             if (match.getClosestMatch() != null) {
                 LOG.info(addInfo(match.getClosestMatch(), CLOSEST_MATCH));
                 closematches++;
             }
+            LOG.info("");
         }
         commits++;
-        if (commits < resultSet.size())
-            LOG.info("");
     }
 
     public void printStats(){

@@ -29,7 +29,7 @@ Working Directory: MCL
 ```
 java -cp "target/classes:target/dependency/*" Main
 ```
-Returns search results for all commits by all developers in the last 12 months sorted by commit date in descending order.
+Returns search results for all commits by all developers in the last 12 months sorted by commit date(in first repo) in descending order.
 
 #### Search for Custom Author
 ```
@@ -39,11 +39,19 @@ java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar"
 ```
 java -cp "target/classes:target/dependency/*" Main -c "Abhishek Kumar"
 ```
+#### Search through the last 10 Days of Commits
+```
+java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar" --days 10
+```
 #### Search through the last 6 Months of Commits
 ```
-java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar" -m 6
+java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar" --months 6
 ```
 #### Search and Sort Results by Status
 ```
-java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar" -sort
+java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar" --sort
+```
+#### Show only missing Commits
+```
+java -cp "target/classes:target/dependency/*" Main -a "Abhishek Kumar" --missing
 ```

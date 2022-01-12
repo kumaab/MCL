@@ -32,7 +32,7 @@ public class Main {
     public static LocalDate endDate         = LocalDate.now(); //LocalDate.of(2021, 10, 8);
     public static LocalDate searchEndDate   = endDate.plus(1, ChronoUnit.MONTHS);
 
-    private static int matches = 0, commits = 0, nMonths = 12;
+    private static int matches = 0, commits = 0, nMonths = 12, nDays = 0;
     private static List<String> excludedMods        = Collections.emptyList();
     private static List<String> reverseExcludedMods = Collections.emptyList();
     private static Properties props = null;
@@ -149,23 +149,31 @@ public class Main {
         LOG.info("Hey, Welcome to the MCL Library!");
         props = Config.readProperties("src/main/resources/config.properties");
         String author = null, committer = null;
-        boolean sortByStatus = false;
+        boolean sortByStatus = false, showMissing = false;
         for(int i=0; i<args.length; i++){
             String arg = args[i];
             if(arg.equals("-a") || arg.equals("--author"))
                 author = args[i+1];
             if(arg.equals("-c") || arg.equals("--committer"))
                 committer = args[i+1];
+            if(arg.equals("-d") || arg.equals("--days"))
+                nDays = Integer.parseInt(args[i+1]);
             if(arg.equals("-m") || arg.equals("--months"))
                 nMonths = Integer.parseInt(args[i+1]);
-            if(arg.equals("-sort"))
+            if(arg.equals("-s") || arg.equals("--sort"))
                 sortByStatus = true;
+            if(arg.equals("--missing"))
+                showMissing = true;
         }
         init();
-        LocalDate startDate       = endDate.minus(nMonths, ChronoUnit.MONTHS);
-        LocalDate searchStartDate = startDate;
+        LocalDate startDate;
+        if (nDays > 0)
+            startDate = endDate.minus(nDays, DAYS);
+        else
+            startDate = endDate.minus(nMonths, ChronoUnit.MONTHS);
+        LocalDate searchStartDate = startDate.minus(1, ChronoUnit.MONTHS);
         if(LOG.isDebugEnabled())
-            LOG.debug("The Start Date is " + startDate);
+            LOG.debug("Searching for commits since " + startDate);
         ArrayList<GitCommit> originalCommits   = process(first, startDate, endDate);
         ArrayList<GitCommit> replicatedCommits = process(second, searchStartDate, searchEndDate);
         originalCommits.sort(new Comparator<GitCommit>() {
@@ -181,7 +189,7 @@ public class Main {
             }
         });
         search(originalCommits, replicatedCommits);
-        Query query = new Query(resultSet, sortByStatus);
+        Query query = new Query(resultSet, sortByStatus, showMissing);
         if (author != null)
             query.printResultForAuthor(author);
         else if (committer != null)
