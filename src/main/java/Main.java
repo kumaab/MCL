@@ -149,21 +149,25 @@ public class Main {
         LOG.info("Hey, Welcome to the MCL Library!");
         props = Config.readProperties("src/main/resources/config.properties");
         String author = null, committer = null;
-        boolean sortByStatus = false, showMissing = false;
+        boolean sortByStatus = false, showMissing = false, writeToFile = false, showStats = false;
         for(int i=0; i<args.length; i++){
             String arg = args[i];
-            if(arg.equals("-a") || arg.equals("--author"))
+            if (arg.equals("-a") || arg.equals("--author"))
                 author = args[i+1];
-            if(arg.equals("-c") || arg.equals("--committer"))
+            if (arg.equals("-c") || arg.equals("--committer"))
                 committer = args[i+1];
-            if(arg.equals("-d") || arg.equals("--days"))
+            if (arg.equals("-d") || arg.equals("--days"))
                 nDays = Integer.parseInt(args[i+1]);
-            if(arg.equals("-m") || arg.equals("--months"))
+            if (arg.equals("-m") || arg.equals("--months"))
                 nMonths = Integer.parseInt(args[i+1]);
-            if(arg.equals("-s") || arg.equals("--sort"))
+            if (arg.equals("-s") || arg.equals("--sort"))
                 sortByStatus = true;
-            if(arg.equals("--missing"))
+            if (arg.equals("--missing"))
                 showMissing = true;
+            if (arg.equals("--dump"))
+                writeToFile = true;
+            if (arg.equals("--stats"))
+                showStats = true;
         }
         init();
         LocalDate startDate;
@@ -196,6 +200,12 @@ public class Main {
             query.printResultForCommitter(committer);
         else {
             query.printAllResults();
+        }
+        if (writeToFile){
+            query.writeToFile("dump.txt");
+        }
+        if (showStats){
+            query.printStats();
         }
     }
 }
