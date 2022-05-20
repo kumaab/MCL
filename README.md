@@ -1,6 +1,6 @@
 # MCL
 
-Missing Commit Locator.
+Missing Commit Locator
 
 ## Installation
 
