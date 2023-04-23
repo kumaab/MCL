@@ -1,26 +1,22 @@
+package org.mcl.model;
+
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+@Data
 public class GitCommit {
 
-    public final String committer;
-    public final String commitMessage;
-    public final String commitHash;
-    public final String author;
-    public final LocalDate commitDate;
-    public HashSet<File> changeSet;
-    public List<String> fileNames;
-
-    public String getCommitter() { return committer; }
-
-    public String getCommitMessage() { return commitMessage; }
-
-    public String getAuthor() { return author; }
-
-    public LocalDate getCommitDate() { return commitDate; }
+    private final String committer;
+    private final String commitMessage;
+    private final String commitHash;
+    private final String author;
+    private final LocalDate commitDate;
+    private HashSet<File> changeSet;
+    private List<String> fileNames;
 
     public HashSet<File> getChangeSet() { return changeSet; }
 
@@ -33,7 +29,7 @@ public class GitCommit {
     public void setFileNames(){
         this.fileNames = new ArrayList<>();
         for(File file: this.changeSet)
-            fileNames.add(file.fileName);
+            fileNames.add(file.getFileName());
     }
 
     public GitCommit(String committer, String commitMessage, String commitHash, String author, LocalDate commitDate){

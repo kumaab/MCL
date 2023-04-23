@@ -1,3 +1,4 @@
+package org.mcl.model;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -15,22 +16,23 @@ import java.util.Optional;
 
 public class GitRepo {
 
-    private final Git git;
-    private final Repository repo;
+    private Git git;
+    private Repository repo;
+    private final String gitUrl;
+    private final String repoPath;
+    private final String branchName;
+    private final boolean clone;
     private final String repoAlias;
     private static final TextProgressMonitor consoleProgressMonitor = new TextProgressMonitor(new PrintWriter(System.out));
     private static final Logger LOG = LogManager.getLogger(GitRepo.class);
 
-    GitRepo(){
-        this.git = null;
-        this.repo = null;
-        this.repoAlias = null;
-    }
-
-    GitRepo(Git git, Repository repo, String repoAlias){
-        this.git = git;
-        this.repo = repo;
-        this.repoAlias = repoAlias;
+    public GitRepo(String repoPath, String gitUrl, String branchName, String alias, boolean clone){
+        this.repoPath   = repoPath;
+        this.gitUrl     = gitUrl;
+        this.branchName = branchName;
+        this.repoAlias  = alias;
+        this.clone      = clone;
+        init();
     }
 
     public Git getGit(){ return git; }
@@ -39,7 +41,7 @@ public class GitRepo {
 
     public String getRepoAlias() { return repoAlias; }
 
-    public static Repository clone(File path, String uri) throws GitAPIException {
+    public Repository clone(File path, String uri) throws GitAPIException {
         if(LOG.isDebugEnabled())
             LOG.debug("Cloning repository");
         return Git.cloneRepository()
@@ -49,7 +51,7 @@ public class GitRepo {
                 .call().getRepository();
     }
 
-    public static Git checkout(Repository repo, String branchName, String remote) throws GitAPIException {
+    public Git checkout(Repository repo, String branchName, String remote) throws GitAPIException {
         Git git = new Git(repo);
         Optional<String> developBranch = git.branchList()
                 .setListMode(ListBranchCommand.ListMode.REMOTE)
@@ -71,15 +73,22 @@ public class GitRepo {
         return git;
     }
 
-    public GitRepo init(String homeDir, String uri, String branch, String alias, boolean clone) throws GitAPIException {
-        File repoPath = new File(homeDir);
-        Repository repo;
-        if (clone) {
-            repo = clone(repoPath, uri);
-        } else {
-            repo = Git.init().setDirectory(repoPath).call().getRepository();
+    public void init() {
+        File repoPath = new File(this.repoPath);
+        try {
+            if (this.clone) {
+                this.repo = clone(repoPath, this.gitUrl);
+            } else {
+                this.repo = Git.init().setDirectory(repoPath).call().getRepository();
+            }
+            this.git = checkout(this.repo, "fresh_" + this.branchName + "_", "origin/" + this.branchName);
+        } catch (GitAPIException exp){
+            LOG.error("Error checking out repo: " + exp);
         }
-        Git git = checkout(repo, "fresh_" + branch + "_", "origin/" + branch);
-        return new GitRepo(git, repo, alias);
+    }
+
+    public void pull(){
+        assert git != null;
+        git.pull();
     }
 }

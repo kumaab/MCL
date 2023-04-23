@@ -1,6 +1,8 @@
 
+package org.mcl.config;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.mcl.utils.Constants;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,12 +16,16 @@ public class Config {
 
     private static final Logger LOG     = LogManager.getLogger(Config.class);
 
-    public static boolean isDir(String path){
+    public boolean isDir(String path){
         File f = new File(path);
         return f.isDirectory();
     }
 
-    public static Properties readProperties(String fileName) {
+    public Properties readProperties() {
+        return readProperties(Constants.propertiesFile);
+    }
+
+    public Properties readProperties(String fileName) {
         Properties  ret     = null;
         InputStream inStr   = null;
         URL fileURL         = null;
@@ -39,18 +45,14 @@ public class Config {
 
             if (fileURL == null) {
                 fileURL = ClassLoader.getSystemClassLoader().getResource(fileName);
-
             }
         }
 
         if (fileURL != null) {
             try {
                 inStr = fileURL.openStream();
-
                 Properties prop = new Properties();
-
                 prop.load(inStr);
-
                 ret = prop;
             } catch (Exception excp) {
                 LOG.error("failed to load properties from file '" + fileName + "'", excp);

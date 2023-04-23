@@ -1,4 +1,6 @@
 
+package org.mcl.model;
+import org.mcl.model.GitCommit;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +12,7 @@ public class Match {
     private GitCommit closestMatch;
     private List<Double> closestRatios;
 
-    Match(GitCommit originalCommit){
+    public Match(GitCommit originalCommit){
         this.originalCommit = originalCommit;
         this.replicatedCommits = new HashMap<>();
     }

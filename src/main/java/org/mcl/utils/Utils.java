@@ -1,4 +1,4 @@
-
+package org.mcl.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
@@ -10,6 +10,7 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.mcl.model.File;
 
 public class Utils {
     private static ByteArrayOutputStream out;

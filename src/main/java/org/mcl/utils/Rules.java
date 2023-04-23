@@ -1,19 +1,17 @@
 
-
+package org.mcl.utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mcl.model.File;
+import org.mcl.model.GitCommit;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Locale;
 
 public class Rules {
-    private static final Double STRICT_THRESHOLD       = 0.98;
-    private static final Double PRODUCT_THRESHOLD      = 0.90;
-    private static final Double WEAK_THRESHOLD         = 0.80;
-    private static final Double COMMIT_MSG_SIMILARITY  = 0.70;
-    private static final Integer COMMIT_MSG_PREFIX_LEN = 11; // length of RANGER-JIRA
-    private static final String SYSTEM_USER            = "Jenkins User";
-    private static final Logger LOG                    = LogManager.getLogger(Rules.class);
-
+    private static final Logger LOG = LogManager.getLogger(Rules.class);
     Rules(){}
 
     public static GitCommit filter(GitCommit commit, List<String> excludedModules){
@@ -25,7 +23,7 @@ public class Rules {
     }
 
     public static boolean isSystemUser(GitCommit gitCommit){
-        return gitCommit.getAuthor().equals(SYSTEM_USER);
+        return gitCommit.getAuthor().equals(Constants.SYSTEM_USER);
     }
 
     public static boolean singletonMismatch(GitCommit gitCommit1, GitCommit gitCommit2){
@@ -50,8 +48,8 @@ public class Rules {
         ArrayList<Double> ratios = new ArrayList<>();
         for (File file1 : commit1.getChangeSet()) {
             for (File file2 : commit2.getChangeSet()) {
-                if (file1.fileName.equals(file2.fileName)) {
-                    ratios.add(Utils.similarity(file1.content, file2.content));
+                if (file1.getFileName().equals(file2.getFileName())) {
+                    ratios.add(Utils.similarity(file1.getContent(), file2.getContent()));
                 }
             }
         }
@@ -61,7 +59,7 @@ public class Rules {
     private static long count(ArrayList<Double> ratios){
         long count = 0;
         for(Double ratio: ratios){
-            if (ratio > STRICT_THRESHOLD ){
+            if (ratio > Constants.Thresholds.STRICT_THRESHOLD ){
                 count++;
             }
         }
@@ -77,15 +75,15 @@ public class Rules {
     }
 
     public static boolean product(ArrayList<Double> ratios){
-        return ratios.stream().reduce(1.0, (a, b) -> a * b) > PRODUCT_THRESHOLD;
+        return ratios.stream().reduce(1.0, (a, b) -> a * b) > Constants.Thresholds.PRODUCT_THRESHOLD;
     }
 
     public static boolean commitMsgCheck(String commitMsg1, String commitMsg2){
-        if (commitMsg2.contains(commitMsg1.substring(0,COMMIT_MSG_PREFIX_LEN)))
+        if (commitMsg2.contains(commitMsg1.substring(0, Constants.COMMIT_MSG_PREFIX_LEN)))
             return true;
         else{
-            return Utils.similarity(commitMsg1.substring(COMMIT_MSG_PREFIX_LEN),
-                    commitMsg2.substring(COMMIT_MSG_PREFIX_LEN)) > COMMIT_MSG_SIMILARITY;
+            return Utils.similarity(commitMsg1.substring(Constants.COMMIT_MSG_PREFIX_LEN),
+                    commitMsg2.substring(Constants.COMMIT_MSG_PREFIX_LEN)) > Constants.Thresholds.COMMIT_MSG_SIMILARITY;
         }
     }
 
@@ -110,6 +108,6 @@ public class Rules {
     }
 
     public static boolean weakThreshold(ArrayList<Double> ratios){
-        return ratios.stream().reduce(1.0, (a, b) -> a * b) > WEAK_THRESHOLD;
+        return ratios.stream().reduce(1.0, (a, b) -> a * b) > Constants.Thresholds.WEAK_THRESHOLD;
     }
 }
