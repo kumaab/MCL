@@ -2,6 +2,7 @@ package org.mcl.model;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
+import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -40,6 +41,8 @@ public class GitRepo {
     public Repository getRepo() { return repo; }
 
     public String getRepoAlias() { return repoAlias; }
+
+    public String getRepoPath() { return repoPath; }
 
     public Repository clone(File path, String uri) throws GitAPIException {
         if(LOG.isDebugEnabled())
@@ -87,8 +90,16 @@ public class GitRepo {
         }
     }
 
-    public void pull(){
+    public void pull() throws GitAPIException {
         assert git != null;
-        git.pull();
+        // Pull changes from upstream
+        PullResult pullResult = git.pull()
+                .setRemote("origin")
+                .setRemoteBranchName(branchName)
+                .call();
+        if(LOG.isDebugEnabled()){
+            LOG.debug("Pull result: " + pullResult.getMergeResult().toString());
+        }
+
     }
 }

@@ -18,17 +18,19 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
+import java.util.Random;
+import java.util.List;
 import java.util.Properties;
-import java.util.Timer;
 import java.util.TimerTask;
 
 @Slf4j
 public class JettyServer {
     // Periodic interval in milliseconds
     private static final long FETCH_INTERVAL = 30 * 60 * 1000; // 30 minutes
-
     private static final long N_COMMITS = 20;
+    private static Main main;
+    private static GitRepo sourceRepo;
+    private static List<GitCommit> sourceCommits;
 
     // Start the Jetty server and fetchCommits periodically
     public static void main(String[] args) throws Exception {
@@ -41,6 +43,8 @@ public class JettyServer {
         context.addServlet(new ServletHolder(new FetchCommitsServlet()), "/*");
 
         server.start();
+
+        initRepo();
 
         // Schedule a timer task to periodically fetchCommits
         //Timer timer = new Timer();
@@ -71,33 +75,33 @@ public class JettyServer {
         }
     }
 
+    static void initRepo() throws GitAPIException {
+        main = new Main();
+        Properties props = main.getProperties();
+        sourceRepo  = new GitRepo(
+                props.getProperty(Constants.SOURCE_LOCAL_PATH),
+                props.getProperty(Constants.SOURCE_GIT_URL),
+                props.getProperty(Constants.SOURCE_BRANCH_NAME),
+                props.getProperty(Constants.SOURCE_ALIAS),
+                main.toCloneSource());
+        LocalDate endDate = LocalDate.now();
+        sourceCommits = main.process(sourceRepo, endDate.minus(15, ChronoUnit.MONTHS), endDate);
+    }
+
     // Method to fetch last N commits
     static String fetchCommits(long N) {
         // Implement your logic to fetch commits here
         // and return the response as a string
-        try {
-            Main main = new Main();
-            Properties props = main.getProperties();
-            GitRepo source  = new GitRepo(
-                    props.getProperty(Constants.SOURCE_LOCAL_PATH),
-                    props.getProperty(Constants.SOURCE_GIT_URL),
-                    props.getProperty(Constants.SOURCE_BRANCH_NAME),
-                    props.getProperty(Constants.SOURCE_ALIAS),
-                    main.toCloneSource());
-            LocalDate endDate = LocalDate.now();
-            ArrayList<GitCommit> sourceCommits =
-                    main.process(source, endDate.minus(10, ChronoUnit.MONTHS), endDate);
-            StringBuilder stringBuilder = new StringBuilder();
-            for(int i = 0; i < N && i < sourceCommits.size(); i++){
-                GitCommit gitCommit = sourceCommits.get(i);
-                String message = gitCommit.getCommitMessage() + " --- " + gitCommit.getAuthor() + "\n";
-                stringBuilder.append(message);
-            }
-            return stringBuilder.toString();
+        Random random = new Random();
+        int randomNumber = random.nextInt(10);
+        N = N + randomNumber;
 
-        } catch (GitAPIException gitAPIException){
-            log.error("Error initializing repo" + gitAPIException);
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i = 0; i < N && i < sourceCommits.size(); i++){
+            GitCommit gitCommit = sourceCommits.get(i);
+            String message = gitCommit.getCommitMessage() + " --- " + gitCommit.getAuthor() + "\n";
+            stringBuilder.append(message);
         }
-        return "Fetched commits!";
+        return stringBuilder.toString();
     }
 }
